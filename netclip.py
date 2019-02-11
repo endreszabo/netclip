@@ -94,6 +94,7 @@ class NetClip:
 
         self.source_clipboard = Gtk.Clipboard.get(source_clipboard)
         self.destination_clipboard = Gtk.Clipboard.get(destination_clipboard)
+        self.notifications=[]
 
         self.clip_max_count = args.count
         self.menu_max_width = args.width
@@ -303,8 +304,10 @@ class NetClip:
         else:
             notification = Notify.Notification.new("Got clip from %s" % address[0],
                                                    clip.get_itemlabel(), None)
+            notification.add_action('clicked', 'Copy it', self.copy_clip_from_notification, clip)
         notification.set_image_from_pixbuf(GdkPixbuf.Pixbuf.new_from_file(ICON_LOCATION))
         notification.show()
+        self.notifications.append(notification)
 
         #insert current entry
         self.received_clips.insert(0, clip)
@@ -318,6 +321,10 @@ class NetClip:
 
         return True
 
+    def copy_clip_from_notification(self, notification=None, action_name=None, clip=None):
+        """wrapper for when called from notification action"""
+
+        self.copy_clip(clip=clip)
     def copy_clip(self, obj=None, clip=None):
         # pylint: disable=W0613
         """Copies referenced clip to the required clipboard"""
